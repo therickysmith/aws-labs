@@ -11,7 +11,7 @@
 A complete pipeline that:
 1. Stores a model in S3
 2. Deploys it to EKS as an inference service
-3. Calls the Anthropic or OpenAI API to enrich responses
+3. Optionally calls the Anthropic API to enrich responses with AI-generated explanations
 4. Exposes it via a load balancer
 5. Has automated deployment via a shell script (simulating CI/CD)
 
@@ -52,13 +52,11 @@ import pickle
 import numpy as np
 import os
 import boto3
-import anthropic
 
 app = Flask(__name__)
 model = None
 
 def load_model():
-    """Load model from S3 on startup."""
     global model
     bucket = os.environ.get("MODEL_BUCKET")
     key = os.environ.get("MODEL_KEY", "models/model.pkl")
@@ -83,27 +81,27 @@ def predict():
     if not data:
         return jsonify({"error": "No data provided"}), 400
 
-    # Get model prediction
     features = np.array(data)
     prediction = model.predict(features).tolist()
 
-    # Enrich with AI explanation using Anthropic API
-    client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=150,
-        messages=[{
-            "role": "user",
-            "content": f"A classification model predicted {prediction} for input features {data[0]}. Provide a one sentence plain-English explanation of what this prediction means."
-        }]
-    )
-    explanation = message.content[0].text
+    response = {"prediction": prediction, "model": "random-forest-v1"}
 
-    return jsonify({
-        "prediction": prediction,
-        "explanation": explanation,
-        "model": "random-forest-v1"
-    })
+    # Optionally enrich with an AI explanation if an API key is configured
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if api_key:
+        import anthropic
+        client = anthropic.Anthropic(api_key=api_key)
+        message = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=150,
+            messages=[{
+                "role": "user",
+                "content": f"A classification model predicted {prediction} for input features {data[0]}. Provide a one sentence plain-English explanation of what this prediction means."
+            }]
+        )
+        response["explanation"] = message.content[0].text
+
+    return jsonify(response)
 
 if __name__ == "__main__":
     load_model()
@@ -199,6 +197,7 @@ spec:
             secretKeyRef:
               name: api-secrets
               key: anthropic-api-key
+              optional: true  # omit this env var entirely if you don't have an API key
         resources:
           requests:
             memory: "256Mi"
@@ -233,7 +232,8 @@ spec:
   type: LoadBalancer
 ```
 
-Create the API key secret:
+**Optional:** if you have an Anthropic API key, create the secret and predictions will include an AI-generated explanation. If you skip this, predictions still work — the explanation field just won't appear.
+
 ```bash
 kubectl create secret generic api-secrets \
   --from-literal=anthropic-api-key=YOUR_ANTHROPIC_API_KEY
