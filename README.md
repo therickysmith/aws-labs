@@ -31,9 +31,12 @@ Work through each lab in order, building toward a fully functional AI deployment
 
 - AWS free tier account (aws.amazon.com/free)
 - AWS CLI installed and configured
-- Docker Desktop installed
-- kubectl installed
 - Basic terminal/command line comfort
+
+The following are only needed when you reach the relevant lab:
+
+- **Lab 4:** `kubectl` and `eksctl`
+- **Lab 6:** Docker (Linux/Mac) or Podman (Fedora/RHEL — drop-in replacement, use `podman` wherever the lab says `docker`)
 
 ---
 
