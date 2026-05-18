@@ -1,7 +1,7 @@
 # Lab 4 — EKS: Kubernetes on AWS
 
 **Time:** ~2-3 hours  
-**Cost:** ~$0.10/hr for the EKS cluster — shut it down when done  
+**Cost:** ~$0.30/hr while the cluster is running — EKS control plane ($0.10/hr) + 2x t3.medium nodes (~$0.10/hr each). Shut it down when done.  
 **Goal:** Deploy and manage a Kubernetes cluster on AWS EKS. This is the core skill for AI infrastructure roles.
 
 ---

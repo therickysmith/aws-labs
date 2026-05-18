@@ -150,6 +150,42 @@ aws iam create-policy \
 
 ---
 
+## 🧹 Cleanup
+
+IAM resources don't cost money, but it's good practice to clean up after each lab.
+
+```bash
+# Remove user from group, then delete user
+aws iam remove-user-from-group --user-name devops-user --group-name devops-team
+aws iam delete-login-profile --user-name devops-user
+aws iam delete-user --user-name devops-user
+
+# Detach policy from group, then delete group
+aws iam detach-group-policy \
+  --group-name devops-team \
+  --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+aws iam delete-group --group-name devops-team
+
+# Detach policy from role, then delete role
+aws iam detach-role-policy \
+  --role-name ec2-s3-access-role \
+  --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess
+aws iam delete-role --role-name ec2-s3-access-role
+
+# Delete custom policies
+POLICY_ARN=$(aws iam list-policies --scope Local \
+  --query 'Policies[?PolicyName==`specific-bucket-access`].Arn' \
+  --output text)
+[ -n "$POLICY_ARN" ] && aws iam delete-policy --policy-arn $POLICY_ARN
+
+POLICY_ARN=$(aws iam list-policies --scope Local \
+  --query 'Policies[?PolicyName==`ml-pipeline-policy`].Arn' \
+  --output text)
+[ -n "$POLICY_ARN" ] && aws iam delete-policy --policy-arn $POLICY_ARN
+```
+
+---
+
 ## ✅ What you learned
 
 - How IAM users, groups, and roles work

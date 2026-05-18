@@ -1,7 +1,7 @@
 # Lab 5 — SageMaker: AI/ML Model Deployment
 
 **Time:** ~2 hours  
-**Cost:** ~$0.05–0.10 — use ml.t2.medium, delete the endpoint when done  
+**Cost:** ~$0.05–0.10 — use ml.t2.medium, delete the endpoint when done. Free if your AWS account is less than 2 months old (SageMaker free tier covers 125 hrs of inference hosting).  
 **Goal:** Deploy a real ML model on AWS SageMaker. Understand the full lifecycle: train → package → deploy → call → monitor → clean up.
 
 ---
