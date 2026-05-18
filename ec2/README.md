@@ -139,6 +139,23 @@ Think through these — they're the kind of things you'll be asked in interviews
 
 ---
 
+## 🐛 Common errors
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `Permission denied (publickey)` on SSH | Wrong key file or wrong permissions | Run `chmod 400 my-aws-key.pem` and confirm you're using the right `.pem` file |
+| SSH connection times out | Security group doesn't allow port 22 | EC2 → Security Groups → add inbound rule: SSH / port 22 / your IP |
+| nginx page won't load in browser | Security group doesn't allow port 80 | Add inbound rule: HTTP / port 80 / 0.0.0.0/0 |
+| User Data script didn't run | Script has errors or wrong shebang | SSH in and check `/var/log/cloud-init-output.log` for the actual error |
+
+---
+
+## 🎯 What to put on your GitHub README
+
+> "Launched EC2 instances on AWS, connected via SSH, deployed nginx, and automated server configuration using User Data scripts — the same bootstrapping pattern used in production deployment pipelines."
+
+---
+
 ## 📝 My notes
 
 > Add your own observations, what broke, what surprised you, and what you learned here.

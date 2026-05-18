@@ -90,7 +90,7 @@ def predict():
     # Enrich with AI explanation using Anthropic API
     client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
     message = client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-6",
         max_tokens=150,
         messages=[{
             "role": "user",
@@ -134,7 +134,7 @@ CMD ["python", "app.py"]
 # requirements.txt
 flask==3.0.0
 boto3==1.34.0
-anthropic==0.20.0
+anthropic>=0.40.0
 scikit-learn==1.3.0
 numpy==1.26.0
 gunicorn==21.2.0
@@ -191,7 +191,7 @@ spec:
         - containerPort: 5000
         env:
         - name: MODEL_BUCKET
-          value: "ricky-sagemaker-labs-[your-random]"
+          value: "sagemaker-labs-[suffix]"  # match your Lab 5 bucket name
         - name: MODEL_KEY
           value: "models/model.pkl"
         - name: ANTHROPIC_API_KEY
@@ -375,6 +375,18 @@ A production-grade AI deployment pipeline that:
 > "Built an end-to-end AI inference pipeline on AWS: containerised ML model → ECR → EKS deployment with autoscaling → integrated Anthropic API for response enrichment → automated rolling deployments via shell scripts. Uses IAM roles for secure S3 model storage, Kubernetes secrets for API key management, and liveness/readiness probes for production reliability."
 
 That paragraph on your GitHub README will get attention from hiring managers at AI companies.
+
+---
+
+## 🐛 Common errors
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| Pod stuck in `ImagePullBackOff` | ECR image URI or tag is wrong, or ECR login expired | Re-run the ECR login command and verify the image URI in deployment.yaml |
+| Pod crash-loops on startup | `MODEL_BUCKET` env var wrong, or model.pkl not in S3 at `models/model.pkl` | Check pod logs with `kubectl logs <pod-name>`; verify the S3 path from Lab 5 |
+| `/predict` returns 503 | Model failed to load at startup | Check pod logs for the S3 download error; confirm the IAM service account has S3 read access |
+| Anthropic API returns auth error | Secret value is wrong or secret not mounted | Verify with `kubectl get secret api-secrets -o yaml` and check the key name matches |
+| Health check curl fails in deploy.sh | Load balancer not ready yet when `sleep 10` ends | Increase the sleep or add a retry loop: `until curl -sf http://$ENDPOINT/health; do sleep 5; done` |
 
 ---
 

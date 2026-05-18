@@ -22,6 +22,12 @@ Complete Labs 1-3 first. Also install:
 brew tap weaveworks/tap
 brew install weaveworks/tap/eksctl
 
+# Linux
+curl --silent --location \
+  "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_amd64.tar.gz" \
+  | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+
 # Windows (PowerShell as admin)
 winget install eksctl
 
@@ -198,6 +204,7 @@ eksctl create iamserviceaccount \
   --name s3-access-sa \
   --namespace default \
   --cluster ai-labs-cluster \
+  --region us-east-1 \
   --attach-policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess \
   --approve
 ```
@@ -211,6 +218,7 @@ kind: Pod
 metadata:
   name: s3-test-pod
 spec:
+  restartPolicy: Never
   serviceAccountName: s3-access-sa
   containers:
   - name: aws-cli
@@ -282,6 +290,24 @@ This takes 10-15 minutes. Verify in the AWS console that the cluster is gone.
 2. How does EKS differ from running your own Kubernetes cluster on EC2?
 3. An AI inference service is getting 10x normal traffic. Walk through how you'd handle that with what you've learned.
 4. How would you deploy a new version of a model with zero downtime?
+
+---
+
+## 🐛 Common errors
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| Cluster creation hangs past 25 minutes | CloudFormation error underneath | Check AWS Console → CloudFormation → ai-labs-cluster stack → Events tab for the real error |
+| `kubectl` commands fail after cluster creation | kubeconfig not updated | Run `aws eks update-kubeconfig --name ai-labs-cluster --region us-east-1` |
+| LoadBalancer EXTERNAL-IP stuck at `<pending>` | Normal — takes 2–3 minutes to provision | Keep watching with `--watch`; if it's still pending after 5 minutes check the service events |
+| `s3-test-pod` goes into CrashLoopBackOff | Missing `restartPolicy: Never` — pod keeps restarting after exiting | Make sure your pod spec includes `restartPolicy: Never` |
+| Nodes stuck in `NotReady` | Usually a VPC or IAM permissions issue | Check `kubectl describe node <node-name>` and the CloudFormation events |
+
+---
+
+## 🎯 What to put on your GitHub README
+
+> "Provisioned a managed Kubernetes cluster on AWS EKS using eksctl, deployed containerized applications with horizontal pod autoscaling, and configured IAM roles for service accounts (IRSA) to give pods secure S3 access without credentials."
 
 ---
 

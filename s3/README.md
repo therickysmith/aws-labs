@@ -19,7 +19,7 @@ S3 (Simple Storage Service) is AWS's object storage. In the AI world it's everyw
 2. Click **Create bucket**
 
 ### Step 2 — Configure the bucket
-- **Bucket name:** `ricky-aws-labs-[random-number]` (must be globally unique)
+- **Bucket name:** `aws-labs-[suffix]` where [suffix] is something like your initials + a number, e.g. `aws-labs-rs42` (must be globally unique)
 - **Region:** US East (N. Virginia) — us-east-1
 - **Block Public Access:** Leave all checked (keep it private for now)
 - Click **Create bucket**
@@ -90,8 +90,8 @@ aws s3api put-object --bucket your-bucket-name --key models/
 aws s3api put-object --bucket your-bucket-name --key artifacts/
 aws s3api put-object --bucket your-bucket-name --key logs/
 
-# Upload a fake dataset (create a sample CSV first)
-echo "id,input,output\n1,hello,world\n2,foo,bar" > sample_data.csv
+# Upload a fake dataset
+printf "id,input,output\n1,hello,world\n2,foo,bar\n" > sample_data.csv
 aws s3 cp sample_data.csv s3://your-bucket-name/datasets/
 
 # List the structure
@@ -167,6 +167,23 @@ aws s3api delete-bucket --bucket your-bucket-name
 1. How would you structure S3 for a team of 10 ML engineers working on multiple models?
 2. What's the difference between S3 Standard, S3-IA, and Glacier? When would you use each?
 3. How would you secure an S3 bucket so only specific services can access it?
+
+---
+
+## 🐛 Common errors
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `BucketAlreadyExists` on create | Bucket names are globally unique across all AWS accounts | Pick a different suffix |
+| `AccessDenied` on `aws s3 ls` | Your IAM user lacks S3 permissions | Attach `AmazonS3FullAccess` to your user or use the role from Lab 3 |
+| Object URL returns Access Denied in browser | S3 is private by default | This is correct — objects aren't public unless you explicitly allow it |
+| `BucketNotEmpty` on delete | Bucket still has objects (including old versions if versioning is on) | Run `aws s3 rm s3://your-bucket/ --recursive` first, then delete |
+
+---
+
+## 🎯 What to put on your GitHub README
+
+> "Configured S3 buckets for an AI pipeline — structured folders for datasets, models, and artifacts; enabled versioning for model artifact management; set lifecycle policies to archive old data to Glacier."
 
 ---
 

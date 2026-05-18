@@ -167,6 +167,23 @@ aws iam create-policy \
 
 ---
 
+## 🐛 Common errors
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `AccessDenied` when testing as `devops-user` | User not added to the group yet, or group policy not saved | IAM → User groups → devops-team → verify the user and policy are both listed |
+| EC2 instance can't access S3 even with role attached | Role was attached after launch, or instance profile not selected | Stop/start the instance; confirm the IAM instance profile shows in EC2 → Instance details |
+| `aws iam create-policy` fails | Your IAM user lacks `iam:CreatePolicy` permission | Add `IAMFullAccess` to your user, or ask the account admin |
+| Policy change doesn't take effect immediately | IAM propagation can take a few seconds | Wait 10–15 seconds and retry |
+
+---
+
+## 🎯 What to put on your GitHub README
+
+> "Configured IAM users, groups, and roles on AWS. Wrote custom JSON policies implementing least-privilege access and demonstrated role-based service-to-service authentication — the security model used in production AI pipelines."
+
+---
+
 ## 📝 My notes
 
 > Add your own observations, what broke, what surprised you, and what you learned here.
